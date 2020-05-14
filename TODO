@@ -1,5 +1,5 @@
-- fix regexp skip in js_parse_skip_parens_token()
-- 64-bit atoms in 64-bit mode?
+Misc:
+- use custom printf to avoid C library compatibility issues
 - rename CONFIG_ALL_UNICODE, CONFIG_BIGNUM, CONFIG_ATOMICS, CONFIG_CHECK_JSVALUE ?
 - unify coding style and naming conventions
 - use names from the ECMA spec in library implementation
@@ -11,8 +11,7 @@
 - use 2 bytecode DynBufs in JSFunctionDef, one for reading, one for writing
   and use the same wrappers in all phases
 - use more generic method for line numbers in resolve_variables and resolve_labels
-- bignum:
-  - fix Atomics support
+- use custom timezone support to avoid C library compatibility issues
 
 Memory:
 - test border cases for max number of atoms, object properties, string length
@@ -24,6 +23,7 @@ Memory:
 - improve JS_ComputeMemoryUsage() with more info
 
 Optimizations:
+- 64-bit atoms in 64-bit mode ?
 - use auto-init properties for more global objects
 - reuse stack slots for disjoint scopes, if strip
 - optimize `for of` iterator for built-in array objects
@@ -47,29 +47,22 @@ Optimizations:
 - convert slow array to fast array when all properties != length are numeric
 - optimize destructuring assignments for global and local variables
 - implement some form of tail-call-optimization
-- debugger keyword support
 - optimize OP_apply
 - optimize f(...b)
 
 Extensions:
 - support more features in [features] section
-- add TC39 stage 3 proposals: String.prototype.matchAll, Symbol.matchAll
-- fix preprocessor bug if nested #ifdef in jscompress.c
 - add built-in preprocessor in compiler, get rid of jscompress
   handle #if, #ifdef, #line, limited support for #define
-- limited support for web assembly 
 - get rid of __loadScript, use more common name
 - BSD sockets
-- Process or thread control
-- use custom printf to avoid C library compatibility issues
-- use custom timezone support to avoid C library compatibility issues
+- Workers
 
 REPL:
-- strip internal functions from stack trace
+- debugger
 - readline: support MS Windows terminal
 - readline: handle dynamic terminal resizing
 - multiline editing
-- debugger
 - runtime object and function inspectors
 - interactive object browser
 - use more generic approach to display evaluation results
@@ -78,6 +71,8 @@ REPL:
 - close all predefined methods in repl.js and jscalc.js
 
 Test262o:   0/11262 errors, 463 excluded
-Test262:   51/56682 errors, 787 excluded, 6289 skipped
-Test262bn: 56/58017 errors, 1007 excluded, 5398 skipped
-test262 commit: 51d1abadce1de0b38594b7c9972ee60762f35dd0
+Test262o commit: 7da91bceb9ce7613f87db47ddd1292a2dda58b42 (es5-tests branch)
+
+Test262: 28/70829 errors, 877 excluded, 425 skipped
+Test262 commit: 4a8e49b3ca7f9f74a4cafe6621ff9ba548ccc353
+

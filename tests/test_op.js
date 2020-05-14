@@ -197,12 +197,38 @@ function test_op2()
     assert((typeof null), "object", "typeof");
     assert((typeof unknown_var), "undefined", "typeof");
     
+    a = {x: 1, if: 2, async: 3};
+    assert(a.if === 2);
+    assert(a.async === 3);
+}
+
+function test_delete()
+{
+    var a, err;
+
     a = {x: 1, y: 1};
     assert((delete a.x), true, "delete");
     assert(("x" in a), false, "delete");
+    
+    /* the following are not tested by test262 */
+    assert(delete "abc"[100], true);
 
-    a = {x: 1, if: 2};
-    assert(a.if === 2);
+    err = false;
+    try {
+        delete null.a;
+    } catch(e) {
+        err = (e instanceof TypeError);
+    }
+    assert(err, true, "delete");
+
+    err = false;
+    try {
+        a = { f() { delete super.a; } };
+        a.f();
+    } catch(e) {
+        err = (e instanceof ReferenceError);
+    }
+    assert(err, true, "delete");
 }
 
 function test_prototype()
@@ -291,12 +317,47 @@ function test_template()
     assert(a === "abc123d");
 }
 
+function test_object_literal()
+{
+    var x = 0, get = 1, set = 2; async = 3;
+    a = { get: 2, set: 3, async: 4 };
+    assert(JSON.stringify(a), '{"get":2,"set":3,"async":4}');
+
+    a = { x, get, set, async };
+    assert(JSON.stringify(a), '{"x":0,"get":1,"set":2,"async":3}');
+}
+
+function test_regexp_skip()
+{
+    var a, b;
+    [a, b = /abc\(/] = [1];
+    assert(a === 1);
+    
+    [a, b =/abc\(/] = [2];
+    assert(a === 2);
+}
+
+function test_labels()
+{
+    do x: { break x; } while(0);
+    if (1)
+        x: { break x; }
+    else
+        x: { break x; }
+    with ({}) x: { break x; };
+    while (0) x: { break x; };
+}
+
 test_op1();
 test_cvt();
 test_eq();
 test_inc_dec();
 test_op2();
+test_delete();
 test_prototype();
 test_arguments();
 test_class();
 test_template();
+test_object_literal();
+test_regexp_skip();
+test_labels();

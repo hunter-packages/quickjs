@@ -303,6 +303,9 @@ function test_number()
     assert(parseFloat("-Infinity"), -Infinity);
     assert(parseFloat("123.2"), 123.2);
     assert(parseFloat("123.2e3"), 123200);
+    assert(Number.isNaN(Number("+")));
+    assert(Number.isNaN(Number("-")));
+    assert(Number.isNaN(Number("\x00a")));
 
     assert((25).toExponential(0), "3e+1");
     assert((-25).toExponential(0), "-3e+1");
@@ -310,6 +313,22 @@ function test_number()
     assert((-2.5).toPrecision(1), "-3");
     assert((1.125).toFixed(2), "1.13");
     assert((-1.125).toFixed(2), "-1.13");
+}
+
+function test_eval2()
+{
+    var g_call_count = 0;
+    /* force non strict mode for f1 and f2 */
+    var f1 = new Function("eval", "eval(1, 2)");
+    var f2 = new Function("eval", "eval(...[1, 2])");
+    function g(a, b) {
+        assert(a, 1);
+        assert(b, 2);
+        g_call_count++;
+    }
+    f1(g);
+    f2(g);
+    assert(g_call_count, 2);
 }
 
 function test_eval()
@@ -345,6 +364,8 @@ function test_eval()
     assert(f("a"), 4);
     f("a=3");
     assert(a, 3);
+
+    test_eval2();
 }
 
 function test_typed_array()
@@ -408,16 +429,44 @@ function test_json()
     assert(a.y, true);
     assert(a.z, null);
     assert(JSON.stringify(a), s);
+
+    /* indentation test */
+    assert(JSON.stringify([[{x:1,y:{},z:[]},2,3]],undefined,1),
+`[
+ [
+  {
+   "x": 1,
+   "y": {},
+   "z": []
+  },
+  2,
+  3
+ ]
+]`);
 }
 
 function test_date()
 {
-    var d = new Date(1506098258091), a;
+    var d = new Date(1506098258091), a, s;
     assert(d.toISOString(), "2017-09-22T16:37:38.091Z");
     d.setUTCHours(18, 10, 11);
     assert(d.toISOString(), "2017-09-22T18:10:11.091Z");
     a = Date.parse(d.toISOString());
     assert((new Date(a)).toISOString(), d.toISOString());
+    s = new Date("2020-01-01T01:01:01.1Z").toISOString();
+    assert(s ==  "2020-01-01T01:01:01.100Z");
+    s = new Date("2020-01-01T01:01:01.12Z").toISOString();
+    assert(s ==  "2020-01-01T01:01:01.120Z");
+    s = new Date("2020-01-01T01:01:01.123Z").toISOString();
+    assert(s ==  "2020-01-01T01:01:01.123Z");
+    s = new Date("2020-01-01T01:01:01.1234Z").toISOString();
+    assert(s ==  "2020-01-01T01:01:01.123Z");
+    s = new Date("2020-01-01T01:01:01.12345Z").toISOString();
+    assert(s ==  "2020-01-01T01:01:01.123Z");
+    s = new Date("2020-01-01T01:01:01.1235Z").toISOString();
+    assert(s ==  "2020-01-01T01:01:01.124Z");
+    s = new Date("2020-01-01T01:01:01.9999Z").toISOString();
+    assert(s ==  "2020-01-01T01:01:02.000Z");
 }
 
 function test_regexp()
@@ -452,6 +501,10 @@ function test_regexp()
     a = eval("/\0a/");
     assert(a.toString(), "/\0a/");
     assert(a.exec("\0a")[0], "\0a");
+
+    assert(/{1a}/.toString(), "/{1a}/");
+    a = /a{1+/.exec("a{11");
+    assert(a, ["a{11"] );
 }
 
 function test_symbol()
