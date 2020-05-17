@@ -65,6 +65,8 @@ static void js_std_dbuf_init(JSContext *ctx, DynBuf *s)
    - add socket calls
 */
 
+extern char **environ;
+
 typedef struct {
     struct list_head link;
     int fd;
@@ -2404,7 +2406,7 @@ static int my_execvpe(const char *filename, char **argv, char **envp)
     
     path = getenv("PATH");
     if (!path)
-        path = "/bin:/usr/bin";
+        path = (char *)"/bin:/usr/bin";
     eacces_error = FALSE;
     p = path;
     for(p = path; p != NULL; p = p_next) {
